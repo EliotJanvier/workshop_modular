@@ -186,7 +186,7 @@ Now you should be able to understand the vector class given in the subject!
 Lets code a small game using what we learned.
 In the main, open an SFML window and write its main loop. Create the following classes:
 - ```component_t```, a class with a function pointer called update, of type ```void (*)(component_t *, gameobject_t *)```. All components should be created with a reference to the renderwindow, and to the array in the main containing all components.
-- ```gameobject_t```, a class with an array of ```component_t``` and a method called ```update_components```. This method should call ```update``` on all components stored in the gameobject.
+- ```gameobject_t```, a class with an array of ```component_t``` and a method called ```void update_components(gameobject_t *)```. This method should call ```update``` on all components stored in the gameobject. Also add a method called ```void add_component(gameobject_t *, component_t *)``` that adds a component to the array of components of the gameobject.
 - ```circle_t```, a class based on the ```component_t``` (just like cars were based on the vehicules!) with a method ```void draw(component_t *, gameobject_t *)``` which draws a circle on screen. The default instance of the circle should set the ```update``` method of its base component to its ```draw``` method.
 - ```circle_controller_t```, a class based on the ```component_t```, and that sets the base ```update``` method to ```void take_input(component_t *, gameobject_t *)```. This method takes input from the keyboard and moves the circles present on the given gameobject.
 
@@ -194,4 +194,48 @@ Now add a for loop in the main loop, to call ```update_components``` on each gam
 
 You can now add some gameobjects containing a circle and a circle controller to your program.
 Do you see how easy it will be to add more functionalities? Try to make the game more interactive and fun!
+
+*Note* Your main *could* look something like this:
+
+```C
+int main(int ac, char **av) {
+    if (ac != 2) {
+        return 84;
+    }
+
+    unsigned n_objects = atoi(av[1]);
+    gameobject_t *objects = malloc(sizeof(gameobjects_t *) * n_objects);
+
+    sfVideoMode mode = {800, 600, 32};
+    sfRenderWindow* window;
+    window = sfRenderWindow_create(mode, "Modular is life", sfResize | sfClose, NULL);
+
+    if (!window)
+        return 84;
+
+    for (unsigned i = 0; i < n_objects; ++i) {
+        objects[i] = new(gameobject_t);
+        objects[i]->add_component(objects[i], (component_t *) new(circle_t, rand() % 100, rand() % 100, 5));
+        objects[i]->add_component(objects[i], (component_t *) new(circle_controller_t));
+    }
+
+    while (sfRenderWindow_isOpen(window)) {
+        sfEvent event;
+        while (sfRenderWindow_pollEvent(window, &event)) {
+            if (event.type == sfEvtClosed)
+                sfRenderWindow_close(window);
+        }
+
+        sfRenderWindow_clear(window, sfBlack);
+        for (unsigned i = 0; i < n_objects; ++i) {
+            objects[i]->update_components(objects[i]);
+        }
+        sfRenderWindow_display(window);
+    }
+
+    sfRenderWindow_destroy(window);
+    return 0;
+
+}
+```
 
