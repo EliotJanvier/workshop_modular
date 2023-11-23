@@ -158,7 +158,7 @@ object_t new_object(class_t *base, ...)
 
     if (!new)
         return (NULL);
-    memcpy(new, base, base->size);  // copythe default instance of the class so that the defaults members are initialized the same for all instances of the same class
+    memcpy(new, base, base->size);  // copy the default instance of the class so that the defaults members are initialized the same for all instances of the same class
     if (base->ctor) { // if the class has a custom constructor, call it
         va_start(args, base);
         base->ctor(new, &args); // we call it with the variadic arguments
@@ -167,3 +167,31 @@ object_t new_object(class_t *base, ...)
     return (new); // we return the created instance
 }
 ```
+Delete will free the object. It will call the custom constructor if there is any need to free members of the class.
+```C
+void delete_object(object_t ptr)
+{
+    class_t *base = ptr; // we cast the pointer to a class_t for more readability
+
+    if (base->dtor) { // if the destructor exists, we call it
+        base->dtor(ptr);
+    }
+    free(ptr);
+}
+```
+
+Now you should be able to understand the vector class given in the subject!
+
+## A practical use case
+Lets code a small game using what we learned.
+In the main, open an SFML window and write its main loop. Create the following classes:
+- ```component_t```, a class with a function pointer called update, of type ```void (*)(component_t *, gameobject_t *)```. All components should be created with a reference to the renderwindow, and to the array in the main containing all components.
+- ```gameobject_t```, a class with an array of ```component_t``` and a method called ```update_components```. This method should call ```update``` on all components stored in the gameobject.
+- ```circle_t```, a class based on the ```component_t``` (just like cars were based on the vehicules!) with a method ```void draw(component_t *, gameobject_t *)``` which draws a circle on screen. The default instance of the circle should set the ```update``` method of its base component to its ```draw``` method.
+- ```circle_controller_t```, a class based on the ```component_t```, and that sets the base ```update``` method to ```void take_input(component_t *, gameobject_t *)```. This method takes input from the keyboard and moves the circles present on the given gameobject.
+
+Now add a for loop in the main loop, to call ```update_components``` on each gameobject in the game.
+
+You can now add some gameobjects containing a circle and a circle controller to your program.
+Do you see how easy it will be to add more functionalities? Try to make the game more interactive and fun!
+
