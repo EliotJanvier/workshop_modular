@@ -99,10 +99,71 @@ You see that it is possible to treat both objects as vehicule, while we retain
 the possibility to use their special characteristics. Take a moment to understand
 how this works.
 
-## You go now!
-
-Take the vehicule, car and truck classes defined above, and write
+Take the vehicule, car and truck classes defined above, and write a constructor that creates a car
+from a vehicule given in argument.
 ```C
-car_t *new_car()
+car_t *car_ctor(vehicule_t *base);
+```
+Do the same to create a truck.
+```C
+truck_t *truck_ctor(vehicule_t *base);
 ```
 
+## End of the intro, let's get real.
+
+Now that you have understood the basics, lets do it for real. We want to be able to
+store anything in our structures, not just cars and trucks.
+Just like the vehicule_t struct, we will define a struct called class_t which
+will be the base for all our objects.
+
+```C
+typedef void *object_t; // this can hold any pointer
+
+typedef void (*ctor_t)(object_t *self, va_list *args); // remember the ... in printf?
+typedef void (*dtor_t)(object_t *self);
+
+typedef struct class_base {
+    char *name;
+    size_t size;
+    ctor_t ctor;
+    dtor_t dtor;
+} class_t;
+```
+Here, name is the name of the class, size is the size of the instances of this class,
+and ctor and dtor are pointer functions to class specifics constructors and destructors.
+
+- Adapt the constructors of your car and truck structure so that they have the same
+prototype as ctor_t.
+- Redefine the car and truck structs so that they are based on the class_t instead of the vehicule_t. Then, create two ```static const``` variables called ```car_default_instance``` and ```truck_default_instance``` that will represent the default, unititialized state of the car and truck classes. Fill in the base with the values that best describe your two new classes.
+
+*Hint* If you don't understand from now on, you can look at the exemple in vector.c to see how it is done.
+
+When that is done, create a pointer of type ```class_t``` called ```car_t_class``` and give it as a value the address of the ```car_default_instance``` variable. If you did everything correctly, you should be able to use the ```new``` and ```delete``` macros given in class.h to create both
+instances of cars and trucks.
+
+## A Deeper look into ```new``` and ```delete```
+```new``` and ```delete``` are defined in the header class.h.
+New can be called to allocate and initialize any struct that is based on the class_t struct.
+It calls the function ```new_object``` defined in new.c. Lets break it down:
+
+```C
+#include <string.h>
+
+// @param class_t *base: the typename_class pointer to the default instance of the class to construct.
+// @param: ...: it takes a variadic number of arguments to accomodate any needs that the class to build may have.
+object_t new_object(class_t *base, ...)
+{
+    object_t new = malloc(base->size); // the class_t base should contain the size to malloc for creating an instance of its type
+    va_list args;
+
+    if (!new)
+        return (NULL);
+    memcpy(new, base, base->size);  // copythe default instance of the class so that the defaults members are initialized the same for all instances of the same class
+    if (base->ctor) { // if the class has a custom constructor, call it
+        va_start(args, base);
+        base->ctor(new, &args); // we call it with the variadic arguments
+        va_end(args);
+    }
+    return (new); // we return the created instance
+}
+```
