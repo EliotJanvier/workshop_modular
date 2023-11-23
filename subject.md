@@ -184,6 +184,9 @@ Now you should be able to understand the vector class given in the subject!
 
 ## A practical use case
 Lets code a small game using what we learned.
+This game will be very simple: the user can specify a number through the command line when starting the program, and the game will display this number of circles. Using the WASD keys, the user will be able to move all the circles on the screen.
+Every object in the game (meaning every circle) will be represented by a 'gameobject'. Every functionality of the object is represented by what we call a component: the image (sprite) is a component, and the controller that moves it following the keys of the keyboard is another one.
+
 In the main, open an SFML window and write its main loop. Create the following classes:
 - ```component_t```, a class with a function pointer called update, of type ```void (*)(component_t *, gameobject_t *)```. All components should be created with a reference to the renderwindow, and to the array in the main containing all components.
 - ```gameobject_t```, a class with an array of ```component_t``` and a method called ```void update_components(gameobject_t *)```. This method should call ```update``` on all components stored in the gameobject. Also add a method called ```void add_component(gameobject_t *, component_t *)``` that adds a component to the array of components of the gameobject.
@@ -193,46 +196,50 @@ In the main, open an SFML window and write its main loop. Create the following c
 Now add a for loop in the main loop, to call ```update_components``` on each gameobject in the game.
 
 You can now add some gameobjects containing a circle and a circle controller to your program.
-Do you see how easy it will be to add more functionalities? Try to make the game more interactive and fun!
+Do you see how easy it will be to add more functionalities? Try to make the game more interactive and fun! (Some ideas: make the circles chase the mouse and kill the player if they touch it, make the circles shoot at each other to destroy the others...).
+You can use the ```vector``` class given in this repository to go faster and create objects dynamically.
 
 *Note* Your main *could* look something like this:
 
 ```C
 int main(int ac, char **av) {
-    if (ac != 2) {
+    if (ac != 2) { // some error handling
         return 84;
     }
 
-    unsigned n_objects = atoi(av[1]);
-    gameobject_t *objects = malloc(sizeof(gameobjects_t *) * n_objects);
+    unsigned n_objects = atoi(av[1]); // how many circles?
+    gameobject_t *objects = malloc(sizeof(gameobjects_t *) * n_objects); // allocing space for the gameobjects
 
-    sfVideoMode mode = {800, 600, 32};
+    sfVideoMode mode = {800, 600, 32}; // small window
     sfRenderWindow* window;
     window = sfRenderWindow_create(mode, "Modular is life", sfResize | sfClose, NULL);
 
-    if (!window)
+    if (!window) // more error handling
         return 84;
 
     for (unsigned i = 0; i < n_objects; ++i) {
-        objects[i] = new(gameobject_t);
-        objects[i]->add_component(objects[i], (component_t *) new(circle_t, rand() % 100, rand() % 100, 5));
-        objects[i]->add_component(objects[i], (component_t *) new(circle_controller_t));
+        objects[i] = new(gameobject_t); // this mallocs the objects themselves
+        objects[i]->add_component(objects[i], (component_t *) new(circle_t, rand() % 100, rand() % 100, 5)); // just a simple circle at a random position, with a radius of five
+        objects[i]->add_component(objects[i], (component_t *) new(circle_controller_t)); // adding the script that will make this circle move
     }
 
     while (sfRenderWindow_isOpen(window)) {
         sfEvent event;
-        while (sfRenderWindow_pollEvent(window, &event)) {
+        while (sfRenderWindow_pollEvent(window, &event)) { // you know this by know dont you?
             if (event.type == sfEvtClosed)
                 sfRenderWindow_close(window);
         }
 
-        sfRenderWindow_clear(window, sfBlack);
+        sfRenderWindow_clear(window, sfBlack); // we clear the window here. Objects should redraw themselves every frame!
         for (unsigned i = 0; i < n_objects; ++i) {
-            objects[i]->update_components(objects[i]);
+            objects[i]->update_components(objects[i]); // the core of the game is here.
         }
         sfRenderWindow_display(window);
     }
 
+    for (int i = 0; i < n_objects; ++i) {
+        delete(objects[i]); // this should destroy the components automatically too!
+    }
     sfRenderWindow_destroy(window);
     return 0;
 
