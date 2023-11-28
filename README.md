@@ -4,7 +4,7 @@
 
 Modular C is a way to structure data to mimic what is done in Object Oriented Programming.
 
-> *Object Oriented Programming (OOP)*: A programming **paradigm** where funcionnalities are encapsulated into objects in order to abstract concepts.
+> *Object Oriented Programming (OOP)*: A programming **paradigm** where funcionnalities are **encapsulated** into **objects** in order to **abstract** concepts.
 
 This has many advantages compared to classical C:
 - It make structures more powerful and standardises the way they are treated
@@ -22,9 +22,9 @@ throw_in_the_sky(truck);
 In the code sample above, you can see that:
 - there are two objects, representing a **car** and a **truck**
 - both of these objects have ***methods*** (or *member functions*) that can be called just like normal functions, with the difference that they are accessible only through their object.
-- the throw_in_the_sky can take both a car_t and a truck_t as argument, and treats them the same way. This is not normally possible in classical C without passing additionnal parameters to define the type of the objects.
+- the throw_in_the_sky can take both a `car_t` and a `truck_t` as argument, and treats them the same way. This is not normally possible in classical C without passing additionnal parameters to define the type of the objects.
 
-With modular C, it is not necessary to keep track of the type of objects because they contain their own functionalities, and a lot of work can be **abstracted** in order to reduce the quantity of code.
+With modular C, it is not necessary to keep track of the type of objects because they contain their own functionalities, and a lot of work can be **abstracted** in order to reduce the quantity of code and have a more organized project.
 
 Let's see how to do this.
 
@@ -101,7 +101,7 @@ Take a moment to understand how this works.
 
 ## End of the intro, let's get real.
 
-Now that you have understood the basics, let's do it for real. We want to be able to store anything in our structures, not just cars and trucks. Just like the vehicule_t struct, we will define a struct called class_t which will be the base for all our objects.
+Now that you have understood the basics, let's do it for real. We want to be able to store anything in our structures, not just cars and trucks. Just like the vehicule_t struct, we will define a struct called `class_t` which will be the base for all our objects.
 
 ```C
 typedef void *object_t; // this can hold any pointer
@@ -116,17 +116,17 @@ typedef struct class_base {
     dtor_t dtor;
 } class_t;
 ```
-As member of the class_t struct, we have:
-- ```name``` as the name of the class
+As member of the `class_t` structure, we have:
+- ```name``` as the name of the **class**
 - ```size``` as the size of the instances of this class
-- ```ctor``` and ```dtor``` that are pointer functions to class specifics constructors and destructors.
+- ```ctor``` and ```dtor``` that are pointer functions to class specifics constructors and destructors. In other words, they are **methods** that will be called when creating or destroying an instance of the class.
 
 
 > ***Task:***
 > - Adapt the constructors of your *car* and *truck* structure so that they have the same prototype as ```ctor_t``` and redefine the *car* and *truck* structs so that they are based on the ```class_t``` instead of the ```vehicule_t```.
 > - Create 2 ```static const``` variables called ```car_default_instance``` and ```truck_default_instance``` that will represent the default, unititialized state of the car and truck classes. Fill in the base with the values that best describe your two new classes.
 
-***Hint***: If you don't understand from now on, you can look at the exemple in **vector.c** to see how it is done.
+> ***Tek1 helper:*** If you don't understand from now on, you can look at the exemple in **vector.c** to see how it is done.
 
 > ***Task:*** When that is done, create a pointer of type ```class_t``` called ```car_t_class``` and give it as a value the address of the ```car_default_instance``` variable. If you did everything correctly, you should be able to use the ```new``` and ```delete``` macros given in class.h to create both instances of cars and trucks.
 
@@ -192,17 +192,17 @@ This game will be very simple: the user can specify a number through the command
 > Then create the following classes:
 >  - ```component_t```, a **class** with a function pointer called ```update```, of type ```void (*)(component_t *, gameobject_t *)```. All components should be created with a reference to the renderwindow, and to the array in the main containing all components.
 >  - ```gameobject_t```, a class with an array of ```component_t``` and a method called ```void update_components(gameobject_t *)```. This method should call ```update``` on all components stored in the gameobject. Also add a method called ```void add_component(gameobject_t *, component_t *)``` that adds a component to the array of components of the gameobject.
->  - ```circle_t```, a class that **inherit** from ```component_t``` (just like cars were based on the vehicules!) with a method ```void draw(component_t *, gameobject_t *)``` which draws a circle on screen. The default instance of the circle should set the ```update``` method of its base component to its ```draw``` method.
+>  - ```circle_t```, a class that **inherits** from ```component_t``` (just like cars were based on the vehicules!) with a method ```void draw(component_t *, gameobject_t *)``` which draws a circle on screen. The default instance of the circle should set the ```update``` method of its base component to its ```draw``` method.
 >  - ```circle_controller_t```, a class based on the ```component_t```, and that sets the base ```update``` method to ```void take_input(component_t *, gameobject_t *)```. This method takes input from the keyboard and moves the circles present on the given gameobject.
 >
 
-> Now add a for loop in the main loop, to call ```update_components``` on each gameobject in the game.
+> ***Task:*** Now add a for loop in the main loop, to call ```update_components``` on each gameobject in the game.
 >
 > You can now add some gameobjects containing a circle and a circle controller to your program.
 
 > ***Reminder for Tek1 students:***
-> - a **class** is a struct that contains function pointers (it is more complicated than that, but for now it is enough)
-> - a **method** is a function member of a class. You need to code the implementation of each method in the class in order to be able to use it.
+> - a **class** is a structure that contains variables and **methods**. You can see the exemple in *vector.h* to visualize how a class is defined.
+> - a **method** is a function member of a class. You need to code the implementation of each method in the class in order to be able to use it. Again, you can see the exemple in *vector.c* to understand how it works.
 
 
 Do you see how easy it will be to add more functionalities?
