@@ -4,7 +4,7 @@
 
 Modular C is a way to structure data to mimic what is done in Object Oriented Programming.
 
-*Object Oriented Programming (OOP)*: A programming **paradigm** where funcionnalities are encapsulated into objects in order to abstract concepts.
+> *Object Oriented Programming (OOP)*: A programming **paradigm** where funcionnalities are encapsulated into objects in order to abstract concepts.
 
 This has many advantages compared to classical C:
 - It make structures more powerful and standardises the way they are treated
@@ -20,11 +20,11 @@ throw_in_the_sky(car);
 throw_in_the_sky(truck);
 ```
 In the code sample above, you can see that:
-- there are two objects, representing a car and a truck
-- both of these objects have *member functions* or ***methods*** that can be called just like normal functions, with the difference that they are accessible only through their object.
+- there are two objects, representing a **car** and a **truck**
+- both of these objects have ***methods*** (or *member functions*) that can be called just like normal functions, with the difference that they are accessible only through their object.
 - the throw_in_the_sky can take both a car_t and a truck_t as argument, and treats them the same way. This is not normally possible in classical C without passing additionnal parameters to define the type of the objects.
 
-With modular C, it is not necessary to keep track of the type of objects because they contain their own functionalities, and a lot of work can be abstracted in order to reduce the quantity of code.
+With modular C, it is not necessary to keep track of the type of objects because they contain their own functionalities, and a lot of work can be **abstracted** in order to reduce the quantity of code.
 
 Let's see how to do this.
 
@@ -46,8 +46,10 @@ The important idea here is that the two following statements give the exact same
     &foo;
     &(foo.x);
 ```
-This works only because foo.x is the first member of the struture, thus they begin at the same place in memory.
-Why is that important? This makes possible to use pointers to both foo.x and foo as if they were the same object. Note that they are not of the same type (foo is of type ``` struct foo_s ``` and foo.x is of type ``` int ```), but because they have the same address they can be used interchangeably.
+This works only because **foo.x** is the **first** member of the struture, thus they begin at the same place in memory.
+Why is that important? This makes possible to use pointers to both *foo.x* and *foo* as if they were the same object.
+
+Note that they are not of the same type (foo is of type ``` struct foo_s ``` and foo.x is of type ``` int ```), but because they have the same address they can be used interchangeably.
 
 Now take this more concrete exemple:
 
@@ -104,8 +106,8 @@ Now that you have understood the basics, let's do it for real. We want to be abl
 ```C
 typedef void *object_t; // this can hold any pointer
 
-typedef void (*ctor_t)(object_t *self, va_list *args); // remember the ... in printf?
-typedef void (*dtor_t)(object_t *self);
+typedef void (*ctor_t)(object_t self, va_list *args); // remember the ... in printf?
+typedef void (*dtor_t)(object_t self);
 
 typedef struct class_base {
     char *name;
@@ -114,21 +116,27 @@ typedef struct class_base {
     dtor_t dtor;
 } class_t;
 ```
-Here, ```name``` is the name of the class, ```size``` is the size of the instances of this class, and ```ctor``` and ```dtor``` are pointer functions to class specifics constructors and destructors.
+As member of the class_t struct, we have:
+- ```name``` as the name of the class
+- ```size``` as the size of the instances of this class
+- ```ctor``` and ```dtor``` that are pointer functions to class specifics constructors and destructors.
 
-> ***Task:*** Adapt the constructors of your car and truck structure so that they have the same prototype as ctor_t.
 
-> ***Task:*** Redefine the car and truck structs so that they are based on the class_t instead of the vehicule_t. Then, create two ```static const``` variables called ```car_default_instance``` and ```truck_default_instance``` that will represent the default, unititialized state of the car and truck classes. Fill in the base with the values that best describe your two new classes.
+> ***Task:***
+> - Adapt the constructors of your *car* and *truck* structure so that they have the same prototype as ```ctor_t``` and redefine the *car* and *truck* structs so that they are based on the ```class_t``` instead of the ```vehicule_t```.
+> - Create 2 ```static const``` variables called ```car_default_instance``` and ```truck_default_instance``` that will represent the default, unititialized state of the car and truck classes. Fill in the base with the values that best describe your two new classes.
 
 ***Hint***: If you don't understand from now on, you can look at the exemple in **vector.c** to see how it is done.
 
-> ***Task:*** When that is done, create a pointer of type ```class_t``` called ```car_t_class``` and give it as a value the address of the ```car_default_instance``` variable. If you did everything correctly, you should be able to use the ```new``` and ```delete``` macros given in class.h to create both
-instances of cars and trucks.
+> ***Task:*** When that is done, create a pointer of type ```class_t``` called ```car_t_class``` and give it as a value the address of the ```car_default_instance``` variable. If you did everything correctly, you should be able to use the ```new``` and ```delete``` macros given in class.h to create both instances of cars and trucks.
 
-## A Deeper look into ```new``` and ```delete```
+## A deeper look into ```new``` and ```delete```
+
 ```new``` and ```delete``` are defined in the header class.h.
-New can be called to allocate and initialize any struct that is based on the class_t struct.
-It calls the function ```new_object``` defined in new.c. Lets break it down:
+
+```new``` can be called to allocate and initialize any struct that is based on the class_t struct. It calls the function ```new_object``` defined in new.c.
+
+Let's break it down:
 
 ```C
 #include <string.h>
@@ -152,7 +160,9 @@ object_t new_object(class_t *base, ...)
     return (new); // we return the created instance
 }
 ```
+
 ```delete``` will free the object. It will call the custom constructor if there is any need to free members of the class.
+
 ```C
 void delete_object(object_t ptr)
 {
@@ -172,26 +182,34 @@ Let's code a small game using what we learned.
 
 This game will be very simple: the user can specify a number through the command line when starting the program, and the game will display this number of circles. Using the *WASD* keys, the user will be able to move all the circles on the screen.
 
-Every object in the game (meaning every circle) will be represented by a **gameobject**. Every functionality of the object is represented by what we call a **component**: the image (sprite) is a component, and the controller that moves it following the keys of the keyboard is another one.
+>Lexicon:
+>- A **gameobject** represents every object in the game (meaning every circle in our case).
+>- A **component** represents a functionality of the gameobject (meaning the image of the circle, or the controller that moves it).
 
-> ***Task:*** In the main, open an *SFML* window and write its main loop. Create the following classes:
+
+> ***Task:*** In the main, open an *CSFML* window and write its main loop.
+>
+> Then create the following classes:
 >  - ```component_t```, a **class** with a function pointer called ```update```, of type ```void (*)(component_t *, gameobject_t *)```. All components should be created with a reference to the renderwindow, and to the array in the main containing all components.
 >  - ```gameobject_t```, a class with an array of ```component_t``` and a method called ```void update_components(gameobject_t *)```. This method should call ```update``` on all components stored in the gameobject. Also add a method called ```void add_component(gameobject_t *, component_t *)``` that adds a component to the array of components of the gameobject.
 >  - ```circle_t```, a class that **inherit** from ```component_t``` (just like cars were based on the vehicules!) with a method ```void draw(component_t *, gameobject_t *)``` which draws a circle on screen. The default instance of the circle should set the ```update``` method of its base component to its ```draw``` method.
 >  - ```circle_controller_t```, a class based on the ```component_t```, and that sets the base ```update``` method to ```void take_input(component_t *, gameobject_t *)```. This method takes input from the keyboard and moves the circles present on the given gameobject.
+>
+
+> Now add a for loop in the main loop, to call ```update_components``` on each gameobject in the game.
+>
+> You can now add some gameobjects containing a circle and a circle controller to your program.
 
 > ***Reminder for Tek1 students:***
 > - a **class** is a struct that contains function pointers (it is more complicated than that, but for now it is enough)
 > - a **method** is a function member of a class. You need to code the implementation of each method in the class in order to be able to use it.
 
 
-Now add a for loop in the main loop, to call ```update_components``` on each gameobject in the game.
-
-You can now add some gameobjects containing a circle and a circle controller to your program.
-Do you see how easy it will be to add more functionalities? Try to make the game more interactive and fun! (Some ideas: make the circles chase the mouse and kill the player if they touch it, make the circles shoot at each other to destroy the others...).
+Do you see how easy it will be to add more functionalities?
+Try to make the game more interactive and fun! (Some ideas: make the circles chase the mouse and kill the player if they touch it, make the circles shoot at each other to destroy the others...).
 You can use the ```vector``` class given in this repository to go faster and create objects dynamically.
 
-*Note* Your main *could* look something like this:
+*Note*:  Your main *could* look something like this (this won't work as is, you need to code the classes first of course...):
 
 ```C
 int main(int ac, char **av) {
