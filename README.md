@@ -56,19 +56,19 @@ Now take this more concrete exemple:
 ```C
 typedef struct vehicule_s {
     int weight;
-    void (*move)(vehicule_t *self, int distance);
+    void (*move)(struct vehicule_s *self, int distance);
 } vehicule_t;
 
 typedef struct car_s {
     vehicule_t base;
-    void (*honk)(car_t *self, void);
+    void (*honk)(struct car_s *self, void);
 } car_t;
 
 typedef struct truck_s {
     vehicule_t base;
 
     int charge;
-    void (*load)(truck_t *self, int weight);
+    void (*load)(struct truck_s *self, int weight);
 } truck_t;
 
 vehicule_t *car; // actually a car
